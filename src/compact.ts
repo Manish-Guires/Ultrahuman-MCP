@@ -95,3 +95,30 @@ export function metricTypes(x: Json, found = new Set<string>()): Set<string> {
   }
   return found;
 }
+
+// UI-only fields Ultrahuman includes for its app (deep links, analytics tags,
+// formatted markup, chart data). They carry no health information.
+const UI_KEYS = new Set([
+  "deeplink",
+  "education_modal_deeplink",
+  "tracking_params",
+  "index_tracking_params",
+  "display_text_marked_up",
+  "quick_metrics_tiled",
+  "tags_section",
+  "insulin_insights",
+]);
+const GRAPH_KEY = /_graph$/;
+
+/** Drop app-UI fields and per-minute graphs, keeping the health numbers. */
+export function slim(x: Json): Json {
+  if (Array.isArray(x)) return x.map(slim);
+  if (x && typeof x === "object") {
+    return Object.fromEntries(
+      Object.entries(x as Record<string, unknown>)
+        .filter(([k]) => !UI_KEYS.has(k) && !GRAPH_KEY.test(k))
+        .map(([k, v]) => [k, slim(v)]),
+    );
+  }
+  return x;
+}
