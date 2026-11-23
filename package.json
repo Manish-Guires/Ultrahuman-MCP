@@ -1,57 +1,24 @@
 {
   "name": "ultrahuman-mcp",
-  "description": "A Model Context Protocol (MCP) server for fetching health and fitness metrics from the Ultrahuman API, including heart rate, sleep data, steps, temperature, HRV, and more",
-  "author": {
-    "name": "Samuele Monasterolo",
-    "email": "smonasterolo2@gmail.com",
-    "url": "https://www.samuelemonasterolo.com/",
-    "github": "https://github.com/Monasterolo21"
-  },
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Read-only MCP server for Ultrahuman ring data (sleep, HRV, recovery, steps), hostable on Vercel as a claude.ai connector",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Monasterolo21/Ultrahuman-MCP"
-  },
-  "module": "main.ts",
   "type": "module",
-  "bin": {
-    "ultrahuman-mcp": "dist/main.js"
-  },
-  "files": [
-    "dist"
-  ],
+  "private": true,
+  "bin": { "ultrahuman-mcp": "dist/src/stdio.js" },
   "scripts": {
-    "prebuild": "bun scripts/prebuild.ts",
-    "build": "bun build ./src/main.ts --outdir dist --target node && chmod +x dist/main.js",
-    "start": "bun run dist/main.ts",
-    "test": "bun test",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "lint": "bunx biome lint --write src",
-    "format": "bunx biome format --write src",
-    "check": "bunx biome check --write src",
-    "release": "standard-version && bun run update-version",
-    "release:minor": "standard-version --release-as minor && bun run update-version",
-    "release:major": "standard-version --release-as major && bun run update-version",
-    "release:patch": "standard-version --release-as patch && bun run update-version",
-    "update-version": "sed -i '' -e 's/export const VERSION = .*/export const VERSION = '\"'$(node -p 'require(\"./package.json\").version')'\"';/' src/main.ts",
-    "create-tool": "bun scripts/create-tool.ts"
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "start:stdio": "node dist/src/stdio.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@types/bun": "latest",
-    "standard-version": "^9.5.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.1.1",
-    "@types/json-schema": "^7.0.15",
-    "dotenv": "^16.5.0",
-    "pretty-js-log": "^1.1.1",
-    "zod": "^3.24.1",
-    "zod-to-json-schema": "^3.24.1"
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
   }
 }
