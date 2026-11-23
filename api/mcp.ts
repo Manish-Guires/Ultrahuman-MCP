@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isAuthorised } from "../src/auth.js";
-import { createServer } from "../src/server.js";
+import { createServer } from "../src/mcpServer.js";
 
 // Stateless MCP endpoint. vercel.json maps /mcp/<key> here as ?key=<key>.
 export default async function handler(
