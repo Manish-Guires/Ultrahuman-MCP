@@ -133,3 +133,9 @@ test("compact helpers", () => {
   assert.equal(f.data.metrics.d.length, 1);
   assert.deepEqual(compact([1, 2, 3]), [1, 2, 3]);
 });
+
+test("slim drops app-UI fields and graphs but keeps values", async () => {
+  const { slim } = await import("../src/compact.js");
+  const out = slim({ sleep_score: { value: 81, deeplink: "x", tracking_params: [] }, hr_graph: [1, 2], total_sleep: 33060 });
+  assert.deepEqual(out, { sleep_score: { value: 81 }, total_sleep: 33060 });
+});

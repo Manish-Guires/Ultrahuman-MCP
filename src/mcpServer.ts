@@ -1,14 +1,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { compact, filterTypes, metricTypes } from "./compact.js";
+import { compact, filterTypes, metricTypes, slim } from "./compact.js";
 import { authMode, datesBetween, fetchDay, fetchRange } from "./ultrahuman.js";
 
 export const VERSION = "1.0.0";
 const MAX_RANGE_DAYS = 31;
 
-function text(value: unknown) {
+function text(value: unknown, pretty = true) {
   return {
-    content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
+    content: [
+      { type: "text" as const, text: pretty ? JSON.stringify(value, null, 2) : JSON.stringify(value) },
+    ],
   };
 }
 
@@ -40,7 +42,7 @@ export function createServer(): McpServer {
     {
       title: "Ultrahuman metrics for one day",
       description:
-        "Get Ultrahuman ring metrics for a single day: sleep, HRV, resting heart rate, recovery, movement, steps, skin temperature, VO2 max and (if a glucose patch is used) glucose. Set detailed=true to get minute-level series; otherwise long series are summarised as min/avg/max.",
+        "Get Ultrahuman ring metrics for a single day: sleep, HRV, resting heart rate, recovery, movement, steps, skin temperature, VO2 max and (if a glucose patch is used) glucose. Set detailed=true to get the raw response with minute-level series and sleep graphs; otherwise long series are summarised as min/avg/max and app-only fields are removed.",
       inputSchema: {
         date: z.string().optional().describe("YYYY-MM-DD. Defaults to today (UTC)."),
         metric_types: metricFilter,
@@ -51,7 +53,7 @@ export function createServer(): McpServer {
     async ({ date, metric_types, detailed }) => {
       try {
         const raw = filterTypes(await fetchDay(date ?? today()), metric_types);
-        return text(detailed ? raw : compact(raw));
+        return text(detailed ? raw : slim(compact(raw)));
       } catch (e) {
         return fail(e);
       }
@@ -80,9 +82,9 @@ export function createServer(): McpServer {
         }
         const days = await fetchRange(dates);
         const out = Object.fromEntries(
-          Object.entries(days).map(([d, v]) => [d, compact(filterTypes(v, metric_types))]),
+          Object.entries(days).map(([d, v]) => [d, slim(compact(filterTypes(v, metric_types)))]),
         );
-        return text(out);
+        return text(out, false);
       } catch (e) {
         return fail(e);
       }
